@@ -18,15 +18,15 @@ def default_domain_manager():
 
 def test_domain_sep_create():
     salt = os.urandom(32)
-    domain_struct = make_domain(name='name', salt=salt)
+    domain_struct = make_domain(name="name", salt=salt)
 
-    expected_result = 'EIP712Domain(string name,bytes32 salt)'
+    expected_result = "EIP712Domain(string name,bytes32 salt)"
     assert domain_struct.encode_type() == expected_result
 
-    expected_data = b''.join([keccak(text='name'), salt])
+    expected_data = b"".join([keccak(text="name"), salt])
     assert domain_struct.encode_value() == expected_data
 
-    with pytest.raises(ValueError, match='At least one argument must be given'):
+    with pytest.raises(ValueError, match="At least one argument must be given"):
         make_domain()
 
 
@@ -34,16 +34,22 @@ def test_domain_sep_types():
     salt = os.urandom(32)
     contract = os.urandom(20)
 
-    domain_struct = make_domain(name='name', version='version', chainId=1,
-                                verifyingContract=contract, salt=salt)
+    domain_struct = make_domain(
+        name="name", version="version", chainId=1, verifyingContract=contract, salt=salt
+    )
 
-    encoded_data = [keccak(text='name'), keccak(text='version'), int(1).to_bytes(32, 'big', signed=False),
-                    bytes(12) + contract, salt]
+    encoded_data = [
+        keccak(text="name"),
+        keccak(text="version"),
+        int(1).to_bytes(32, "big", signed=False),
+        bytes(12) + contract,
+        salt,
+    ]
 
-    expected_result = 'EIP712Domain(string name,string version,uint256 chainId,address verifyingContract,bytes32 salt)'
+    expected_result = "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract,bytes32 salt)"
     assert domain_struct.encode_type() == expected_result
 
-    expected_data = b''.join(encoded_data)
+    expected_data = b"".join(encoded_data)
     assert domain_struct.encode_value() == expected_data
 
 
@@ -52,15 +58,16 @@ def test_default_domain(default_domain_manager):
 
     class Foo(EIP712Struct):
         s = String()
-    foo = Foo(s='hello world')
 
-    domain = make_domain(name='domain')
-    other_domain = make_domain(name='other domain')
+    foo = Foo(s="hello world")
+
+    domain = make_domain(name="domain")
+    other_domain = make_domain(name="other domain")
 
     # When neither methods provide a domain, expect a ValueError
-    with pytest.raises(ValueError, match='Domain must be provided'):
+    with pytest.raises(ValueError, match="Domain must be provided"):
         foo.to_message()
-    with pytest.raises(ValueError, match='Domain must be provided'):
+    with pytest.raises(ValueError, match="Domain must be provided"):
         foo.signable_bytes()
 
     # But we can still provide a domain explicitly
